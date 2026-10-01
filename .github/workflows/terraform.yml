@@ -1,0 +1,75 @@
+name: Terraform
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform/infrastructure
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.1
+          terraform_wrapper: false
+
+      - name: Create Terraform credentials
+        env:
+          YC_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.YC_SERVICE_ACCOUNT_KEY_JSON }}
+          TF_BACKEND_CREDENTIALS: ${{ secrets.TF_BACKEND_CREDENTIALS }}
+        run: |
+          umask 077
+
+          printf '%s' "$YC_SERVICE_ACCOUNT_KEY_JSON" \
+            > ../bootstrap/terraform-sa-key.json
+
+          printf '%s' "$TF_BACKEND_CREDENTIALS" \
+            > ../bootstrap/terraform-backend-credentials
+
+          chmod 600 \
+            ../bootstrap/terraform-sa-key.json \
+            ../bootstrap/terraform-backend-credentials
+
+      - name: Terraform fmt
+        working-directory: .
+        run: terraform fmt -check -recursive terraform
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color -out=tfplan
+
+      - name: Terraform apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform apply -input=false -auto-approve tfplan
