@@ -1,0 +1,9 @@
+---
+kube_version: "1.36.0"
+
+kubeconfig_localhost: true
+kubeconfig_localhost_ansible_host: true
+kubectl_localhost: false
+
+supplementary_addresses_in_ssl_keys:
+  - 158.160.177.154

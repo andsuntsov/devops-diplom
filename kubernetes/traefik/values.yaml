@@ -1,0 +1,21 @@
+deployment:
+  replicas: 2
+
+service:
+  spec:
+    type: NodePort
+
+ports:
+  web:
+    port: 8000
+    exposedPort: 80
+    protocol: TCP
+    nodePort: 30080
+
+  websecure:
+    expose:
+      default: false
+
+providers:
+  kubernetesIngress:
+    enabled: true
