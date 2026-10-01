@@ -3,6 +3,12 @@ data "yandex_compute_image" "ubuntu" {
   folder_id = "standard-images"
 }
 
+resource "yandex_vpc_address" "master_public_ip" {
+  external_ipv4_address {
+    zone_id = "ru-central1-d"
+  }
+}
+
 resource "yandex_compute_instance" "master" {
   name        = "k8s-master-1"
   hostname    = "k8s-master-1"
@@ -14,7 +20,7 @@ resource "yandex_compute_instance" "master" {
 
   resources {
     cores         = 2
-    memory        = 2
+    memory        = 4
     core_fraction = 50
   }
 
@@ -29,6 +35,7 @@ resource "yandex_compute_instance" "master" {
   network_interface {
     subnet_id          = yandex_vpc_subnet.subnet_d.id
     nat                = true
+    nat_ip_address     = yandex_vpc_address.master_public_ip.external_ipv4_address[0].address
     security_group_ids = [yandex_vpc_security_group.kubernetes.id]
   }
 
@@ -49,7 +56,7 @@ resource "yandex_compute_instance" "worker_1" {
   resources {
     cores         = 2
     memory        = 4
-    core_fraction = 50
+    core_fraction = 100
   }
 
   boot_disk {
