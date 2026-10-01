@@ -25,6 +25,9 @@ jobs:
     name: Terraform
     runs-on: ubuntu-latest
 
+    env:
+      TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
+
     defaults:
       run:
         shell: bash

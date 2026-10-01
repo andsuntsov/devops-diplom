@@ -33,7 +33,7 @@ resource "yandex_compute_instance" "master" {
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${file(pathexpand("~/.ssh/devops-diplom.pub"))}"
+    ssh-keys = "ubuntu:${trimspace(var.ssh_public_key)}\n"
   }
 }
 
@@ -71,7 +71,7 @@ resource "yandex_compute_instance" "worker_1" {
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${file(pathexpand("~/.ssh/devops-diplom.pub"))}"
+    ssh-keys = "ubuntu:${trimspace(var.ssh_public_key)}\n"
   }
 }
 
@@ -109,6 +109,6 @@ resource "yandex_compute_instance" "worker_2" {
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${file(pathexpand("~/.ssh/devops-diplom.pub"))}"
+    ssh-keys = "ubuntu:${trimspace(var.ssh_public_key)}\n"
   }
 }
