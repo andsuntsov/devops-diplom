@@ -100,3 +100,15 @@ Grafana dashboards and Prometheus datasource are provisioned automatically.
 ## Secrets
 
 Credentials, Terraform state, generated kubeconfig files and other sensitive artifacts are excluded from Git via `.gitignore`.
+
+## Terraform CI/CD
+
+GitHub Actions validates and plans Terraform changes for pull requests targeting `main`.
+
+For pushes to `main`, the workflow runs:
+
+```text
+fmt -> init -> validate -> plan -> apply
+```
+
+Terraform credentials are provided through GitHub Actions secrets and are not stored in the repository.
