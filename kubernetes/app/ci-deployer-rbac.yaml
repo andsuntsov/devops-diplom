@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github-actions-deployer
+  namespace: devops-diplom
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: github-actions-deployer
+  namespace: devops-diplom
+rules:
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    resourceNames:
+      - devops-diplom-app
+    verbs:
+      - get
+      - patch
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: github-actions-deployer
+  namespace: devops-diplom
+subjects:
+  - kind: ServiceAccount
+    name: github-actions-deployer
+    namespace: devops-diplom
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: github-actions-deployer
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-actions-deployer-token
+  namespace: devops-diplom
+  annotations:
+    kubernetes.io/service-account.name: github-actions-deployer
+type: kubernetes.io/service-account-token
